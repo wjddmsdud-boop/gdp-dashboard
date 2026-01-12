@@ -1,151 +1,82 @@
+
 import streamlit as st
+
+st.title("숩숩이의 앱!")
+st.write(
+    "안녕하세요! 저는 숩숩입니다. 저는 코딩을 좋아해요!"
+)
+
+# st.markdown(): 마크다운 문법 지원 (굵게, 기울임, 목록 등)
+st.markdown("**굵은 텍스트**, *기울임 텍스트*")
+st.markdown("""- 첫 번째 항목
+- 두 번째 항목
+- 여러 줄을 쓸 때""")
+
+# 정보성 메시지 박스
+st.info("ℹ️ 정보 메시지입니다.")
+st.warning("⚠️ 경고 메시지입니다.")
+st.success("✅ 성공 메시지입니다.")
+st.error("❌ 오류 메시지입니다.")
+
+# 이미지 출력
+st.image("https://static.streamlit.io/examples/cat.jpg", caption="귀여운 고양이", use_container_width=True)
+st.image("https://via.placeholder.com/300", caption="예시 이미지")
+
+# 영상 출력
+st.video("https://www.youtube.com/watch?v=4nU-Fp96p8E")
+st.video("https://www.youtube.com/watch?v=B1J6Ou4q8vE")
+
+# 오디오 출력
+st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+
+# 지도 출력
 import pandas as pd
-import math
-from pathlib import Path
+df = pd.DataFrame({"lat": [37.5], "lon": [127.0]})
+st.map(df, zoom=12)
 
-# Set the title and favicon that appear in the Browser's tab bar.
-st.set_page_config(
-    page_title='GDP dashboard',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
+# 데이터프레임 테이블 출력
+st.dataframe(pd.DataFrame({
+    "이름": ["홍길동", "김철수"],
+    "점수": [85, 92]
+}))
+
+st.title("숩숩이의 앱!")
+st.write(
+    "안녕하세요! 저는 숩숩입니다. 저는 코딩을 좋아해요!"
 )
 
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
+# st.markdown(): 마크다운 문법 지원 (굵게, 기울임, 목록 등)
+st.markdown("**굵은 텍스트**, *기울임 텍스트*")
+st.markdown("""- 첫 번째 항목
+- 두 번째 항목
+- 여러 줄을 쓸 때""")
 
-@st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
+# 정보성 메시지 박스
+st.info("ℹ️ 정보 메시지입니다.")
+st.warning("⚠️ 경고 메시지입니다.")
+st.success("✅ 성공 메시지입니다.")
+st.error("❌ 오류 메시지입니다.")
 
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
+# 이미지 출력
+st.image("https://static.streamlit.io/examples/cat.jpg", caption="귀여운 고양이", use_container_width=True)
+st.image("https://via.placeholder.com/300", caption="예시 이미지")
 
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
+# 영상 출력
+st.video("https://www.youtube.com/watch?v=4nU-Fp96p8E")
+st.video("https://www.youtube.com/watch?v=B1J6Ou4q8vE")
 
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
+# 오디오 출력
+st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
 
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
-    )
+# 지도 출력
+import pandas as pd
+df = pd.DataFrame({"lat": [37.5], "lon": [127.0]})
+st.map(df, zoom=12)
 
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
-
-    return gdp_df
-
-gdp_df = get_gdp_data()
-
-# -----------------------------------------------------------------------------
-# Draw the actual page
-
-# Set the title that appears at the top of the page.
-'''
-# :earth_americas: GDP dashboard
-
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
-'''
-
-# Add some spacing
-''
-''
-
-min_value = gdp_df['Year'].min()
-max_value = gdp_df['Year'].max()
-
-from_year, to_year = st.slider(
-    'Which years are you interested in?',
-    min_value=min_value,
-    max_value=max_value,
-    value=[min_value, max_value])
-
-countries = gdp_df['Country Code'].unique()
-
-if not len(countries):
-    st.warning("Select at least one country")
-
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
-
-''
-''
-''
-
-# Filter the data
-filtered_gdp_df = gdp_df[
-    (gdp_df['Country Code'].isin(selected_countries))
-    & (gdp_df['Year'] <= to_year)
-    & (from_year <= gdp_df['Year'])
-]
-
-st.header('GDP over time', divider='gray')
-
-''
-
-st.line_chart(
-    filtered_gdp_df,
-    x='Year',
-    y='GDP',
-    color='Country Code',
-)
-
-''
-''
-
-
-first_year = gdp_df[gdp_df['Year'] == from_year]
-last_year = gdp_df[gdp_df['Year'] == to_year]
-
-st.header(f'GDP in {to_year}', divider='gray')
-
-''
-
-cols = st.columns(4)
-
-for i, country in enumerate(selected_countries):
-    col = cols[i % len(cols)]
-
-    with col:
-        first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-        last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-
-        if math.isnan(first_gdp):
-            growth = 'n/a'
-            delta_color = 'off'
-        else:
-            growth = f'{last_gdp / first_gdp:,.2f}x'
-            delta_color = 'normal'
-
-        st.metric(
-            label=f'{country} GDP',
-            value=f'{last_gdp:,.0f}B',
-            delta=growth,
-            delta_color=delta_color
-        )
+# 데이터프레임 테이블 출력
+st.dataframe(pd.DataFrame({
+    "이름": ["홍길동", "김철수"],
+    "점수": [85, 92]
+}))
